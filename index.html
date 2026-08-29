@@ -654,4 +654,99 @@ list.appendChild(card);
 
 if(count){
 
-e("avg").t
+e("avg").textContent=(total/count).toFixed(1);
+
+e("avgStars").textContent= stars (Math.round(total/count));
+
+e("count").textContent= count+" "+(count===1?"review":"reviews");
+
+}else{
+
+e("avg").textContent="0.0"; e("avgStars").textContent="★★"; e("count").textContent="No reviews yet";
+
+list.innerHTML=
+
+'<div class="no-reviews">Be the first to leave a review!</ div>';
+
+}
+
+}catch(error){
+
+console.error(error);
+
+e("avg").textContent="0.0";
+
+e("avgStars").textContent="★";
+
+e("count").textContent="Unable to load reviews";
+
+}
+
+e("reviewList").innerHTML=
+
+'<div class="no-reviews">Unable to load reviews. Please try again later.</div>';
+
+}
+
+e("reviewForm").onsubmit=async event=>{
+
+event.preventDefault();
+  const name=e("name").value.trim(); const text=e("text").value.trim();
+
+const rating=document.querySelector( 'input[name="rating"]:checked'
+
+if(!rating){
+
+e("msg").textContent= "Please select a star rating.";
+
+return;
+
+}
+
+const button=e("submit");
+
+button.disabled=true;
+
+e("msg").textContent="Submitting review...";
+
+try{
+
+await addDoc( collection(db,"reviews"),
+
+{
+
+name:name,
+
+text:text,
+
+rating:Number(rating.value),
+
+created At:serverTimestamp()
+
+}
+
+e("reviewForm").reset();
+
+e("msg").textContent= "Thank you! Your review has been submitted.";
+
+await load();
+
+}catch(error){
+
+console.error(error);
+
+e("msg").textContent= "Could not submit review. Please try again.";
+
+}
+
+button.disabled=false;
+
+};
+
+load();
+
+</script>
+
+</body>
+
+</html>
