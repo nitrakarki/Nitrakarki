@@ -1,77 +1,126 @@
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-import{getFirestore,collection,getDocs,addDoc,serverTimestamp}from"https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import{getFirestore,collection,addDoc,getDocs,query,orderBy,serverTimestamp}from"https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
-const app=initializeApp({
+const firebaseConfig={
 apiKey:"AIzaSyC9w-i15TJEjy6VMfWW_q0EWOUtDp0lLI8",
 authDomain:"nitra-hiking-trek.firebaseapp.com",
 projectId:"nitra-hiking-trek",
 storageBucket:"nitra-hiking-trek.firebasestorage.app",
 messagingSenderId:"229092748752",
 appId:"1:229092748752:web:ab822b061527ce37ce1dd5"
-});
-
-const db=getFirestore(app);
-const nav=document.getElementById("nav");
-
-document.getElementById("menuBtn")?.addEventListener("click",()=>{
-nav?.classList.toggle("show");
-});
-
-document.querySelectorAll("#nav a").forEach(a=>{
-a.onclick=()=>nav?.classList.remove("show");
-});
-
-const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({
-"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-}[c]));
-
-const itineraries={
-ebc:["Everest Base Camp Trek — 14 Days",
-"Day 1: Kathmandu — 1,300 m",
-"Day 2: Kathmandu – Lukla – Phakding — 2,651 m • 4 hrs",
-"Day 3: Phakding – Namche Bazaar — 3,438 m • 5–6 hrs",
-"Day 4: Acclimatization at Namche Bazaar",
-"Day 5: Namche – Tengboche — 3,860 m",
-"Day 6: Tengboche – Dingboche — 4,410 m",
-"Day 7: Acclimatization at Dingboche",
-"Day 8: Dingboche – Lobuche — 4,910 m",
-"Day 9: Lobuche – Everest Base Camp – Gorak Shep",
-"Day 10: Kala Patthar – Pheriche",
-"Day 11: Pheriche – Namche Bazaar",
-"Day 12: Namche – Lukla",
-"Day 13: Lukla – Kathmandu",
-"Day 14: Departure"],
-
-abc:["Annapurna Base Camp Trek — 5 Days",
-"Day 1: Pokhara to Chhomrong",
-"Day 2: Chhomrong to Himalaya",
-"Day 3: Himalaya to Annapurna Base Camp",
-"Day 4: Annapurna Base Camp to Bamboo",
-"Day 5: Bamboo to Pokhara"],
-
-langtang:["Langtang Valley Trek — 10 Days",
-"Day 1: Kathmandu",
-"Day 2: Kathmandu – Syabrubesi",
-"Day 3: Syabrubesi – Lama Hotel",
-"Day 4: Lama Hotel – Langtang Village",
-"Day 5: Langtang Village – Kyanjin Gompa",
-"Day 6: Exploration at Kyanjin Gompa",
-"Day 7: Kyanjin Gompa – Lama Hotel",
-"Day 8: Lama Hotel – Syabrubesi",
-"Day 9: Syabrubesi – Kathmandu",
-"Day 10: Departure"]
 };
 
-window.openItinerary=k=>{
-const d=itineraries[k],m=document.getElementById("modal"),c=document.getElementById("modalContent");
-if(!d||!m||!c)return;
-c.innerHTML=`<h2>${esc(d[0])}</h2>`+
-d.slice(1).map(x=>`<div class="day">${esc(x)}</div>`).join("");
-m.style.display="block";
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+
+const menu=document.getElementById("menuBtn");
+const nav=document.getElementById("nav");
+
+if(menu)menu.addEventListener("click",()=>{
+nav.classList.toggle("show");
+menu.setAttribute("aria-expanded",nav.classList.contains("show"));
+});
+
+document.querySelectorAll("nav a").forEach(a=>a.addEventListener("click",()=>{
+nav.classList.remove("show");
+menu.setAttribute("aria-expanded","false");
+}));
+
+let galleryIndex=0;
+
+function visibleSlides(){
+return window.innerWidth<=750?1:3;
+}
+
+function updateGallery(){
+const track=document.getElementById("galleryTrack");
+if(!track)return;
+const total=track.children.length;
+const visible=visibleSlides();
+const max=Math.max(0,total-visible);
+galleryIndex=Math.min(galleryIndex,max);
+track.style.transform=`translateX(-${galleryIndex*(100/visible)}%)`;
+createDots(total-visible+1);
+}
+
+function createDots(total){
+const dots=document.getElementById("dots");
+if(!dots)return;
+dots.innerHTML="";
+for(let i=0;i<total;i++){
+const d=document.createElement("span");
+d.className="dot"+(i===galleryIndex?" active":"");
+d.onclick=()=>{galleryIndex=i;updateGallery()};
+dots.appendChild(d);
+}
+}
+
+window.moveGallery=function(direction){
+const total=document.querySelectorAll(".gallery-slide").length;
+const max=Math.max(0,total-visibleSlides());
+galleryIndex+=direction;
+if(galleryIndex<0)galleryIndex=max;
+if(galleryIndex>max)galleryIndex=0;
+updateGallery();
+};
+
+window.addEventListener("resize",updateGallery);
+updateGallery();
+
+const itineraries={
+ebc:{
+title:"Everest Base Camp Trek — 14 Days",
+days:[
+"Day 01: Arrival in Kathmandu and trek preparation.",
+"Day 02: Fly to Lukla and trek to Phakding.",
+"Day 03: Trek from Phakding to Namche Bazaar.",
+"Day 04: Acclimatization day in Namche Bazaar.",
+"Day 05: Trek from Namche Bazaar to Tengboche.",
+"Day 06: Trek from Tengboche to Dingboche.",
+"Day 07: Acclimatization day in Dingboche.",
+"Day 08: Trek from Dingboche to Lobuche.",
+"Day 09: Trek to Everest Base Camp via Gorak Shep.",
+"Day 10: Hike to Kala Patthar and trek to Pheriche.",
+"Day 11: Trek from Pheriche to Namche Bazaar.",
+"Day 12: Trek from Namche Bazaar to Lukla.",
+"Day 13: Fly from Lukla to Kathmandu.",
+"Day 14: Departure from Nepal."
+]},
+abc:{
+title:"Annapurna Base Camp Trek — 5 Days",
+days:[
+"Day 01: Drive Pokhara to Samrong and trek to Sinuwa (2,340m).",
+"Day 02: Trek from Sinuwa (2,340m) to Himalaya (2,900m).",
+"Day 03: Trek from Himalaya (2,900m) to Annapurna Base Camp (4,130m).",
+"Day 04: Trek from Annapurna Base Camp to Bamboo.",
+"Day 05: Trek to Jhinu Danda and drive back to Pokhara."
+]},
+langtang:{
+title:"Langtang Valley Trek — 10 Days",
+days:[
+"Day 01: Drive from Kathmandu to Syabrubesi.",
+"Day 02: Trek from Syabrubesi to Lama Hotel.",
+"Day 03: Trek from Lama Hotel to Langtang Village.",
+"Day 04: Trek from Langtang Village to Kyanjin Gompa.",
+"Day 05: Explore Kyanjin Gompa and surrounding Himalayan views.",
+"Day 06: Trek from Kyanjin Gompa to Lama Hotel.",
+"Day 07: Trek from Lama Hotel to Thulo Syabru.",
+"Day 08: Trek from Thulo Syabru to Sing Gompa.",
+"Day 09: Trek from Sing Gompa to Dhunche.",
+"Day 10: Drive back to Kathmandu."
+]}
+};
+
+window.openItinerary=function(type){
+const data=itineraries[type];
+if(!data)return;
+document.getElementById("modalContent").innerHTML=
+`<h2>${data.title}</h2>${data.days.map((d,i)=>`<div class="day"><b>${d.split(":")[0]}:</b>${d.substring(d.indexOf(":")+1)}</div>`).join("")}`;
+document.getElementById("modal").style.display="block";
 document.body.style.overflow="hidden";
 };
 
-window.closeItinerary=()=>{
+window.closeItinerary=function(){
 document.getElementById("modal").style.display="none";
 document.body.style.overflow="";
 };
@@ -80,130 +129,106 @@ document.getElementById("modal")?.addEventListener("click",e=>{
 if(e.target.id==="modal")closeItinerary();
 });
 
-let gi=0;
-const track=document.getElementById("galleryTrack");
-const dots=document.getElementById("dots");
-const mobile=()=>innerWidth<=750;
+document.addEventListener("keydown",e=>{
+if(e.key==="Escape")closeItinerary();
+});
 
-function total(){
-return Math.max(1,document.querySelectorAll(".gallery-slide").length-(mobile()?1:3)+1);
+const form=document.getElementById("reviewForm");
+const list=document.getElementById("reviewList");
+const avg=document.getElementById("avg");
+const avgStars=document.getElementById("avgStars");
+const count=document.getElementById("count");
+const msg=document.getElementById("msg");
+const submit=document.getElementById("submit");
+
+function stars(n){
+return"★".repeat(n)+"☆".repeat(5-n);
 }
 
-function gallery(){
-const n=total();
-gi=(gi+n)%n;
-if(track)track.style.transform=
-`translateX(-${gi*(mobile()?100:33.333333)}%)`;
-
-if(dots)[...dots.children].forEach((x,i)=>
-x.classList.toggle("active",i===gi));
+function escapeHTML(str){
+return String(str).replace(/[&<>"']/g,m=>({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
+}[m]));
 }
-
-function makeDots(){
-if(!dots)return;
-dots.innerHTML="";
-for(let i=0;i<total();i++){
-const d=document.createElement("span");
-d.className="dot";
-d.onclick=()=>{
-gi=i;
-gallery();
-};
-dots.appendChild(d);
-}
-gallery();
-}
-
-window.moveGallery=x=>{
-gi+=x;
-gallery();
-};
-
-makeDots();
-addEventListener("resize",makeDots);
-
-const stars=n=>
-"★".repeat(Math.round(n))+
-"☆".repeat(5-Math.round(n));
 
 async function loadReviews(){
-const list=document.getElementById("reviewList");
-
 try{
-const snap=await getDocs(collection(db,"reviews"));
-const r=[];
+const q=query(collection(db,"reviews"),orderBy("createdAt","desc"));
+const snap=await getDocs(q);
+let total=0;
+list.innerHTML="";
 
-snap.forEach(x=>{
-const d=x.data(),rating=Number(d.rating);
-
-if(d.name&&d.text&&rating>=1&&rating<=5)
-r.push({
-name:d.name,
-text:d.text,
-rating
-});
-});
-
-list.innerHTML=r.length
-?r.map(x=>`
-<div class="review-card">
-<b>${esc(x.name)}</b>
-<div class="review-stars">${stars(x.rating)}</div>
-<p>${esc(x.text)}</p>
-</div>`).join("")
-:"<div class='review-card'>Be the first to leave a review!</div>";
-
-const avg=r.length
-?r.reduce((a,x)=>a+x.rating,0)/r.length
-:0;
-
-document.getElementById("avg").textContent=avg.toFixed(1);
-document.getElementById("avgStars").textContent=stars(avg);
-document.getElementById("count").textContent=
-`${r.length} review${r.length===1?"":"s"}`;
-
-}catch(e){
-console.error(e);
-list.innerHTML=
-"<div class='review-card'>Reviews are temporarily unavailable.</div>";
-}
-}
-
-document.getElementById("reviewForm")?.addEventListener("submit",async e=>{
-e.preventDefault();
-
-const name=document.getElementById("name");
-const rating=document.getElementById("rating");
-const text=document.getElementById("text");
-const msg=document.getElementById("msg");
-const btn=document.getElementById("submit");
-
-if(!name.value.trim()||!text.value.trim()||!rating.value){
-msg.textContent="Please complete all fields.";
+if(snap.empty){
+count.textContent="No reviews yet";
+avg.textContent="0.0";
+avgStars.textContent="☆☆☆☆☆";
 return;
 }
 
-btn.disabled=true;
-msg.textContent="Submitting...";
+snap.forEach(doc=>{
+const r=doc.data();
+const rating=Number(r.rating)||0;
+total+=rating;
+
+const card=document.createElement("div");
+card.className="review-card";
+card.innerHTML=
+`<h3>${escapeHTML(r.name||"Traveler")}</h3>
+<div class="review-stars">${stars(rating)}</div>
+<p>${escapeHTML(r.text||"")}</p>`;
+list.appendChild(card);
+});
+
+const average=total/snap.size;
+avg.textContent=average.toFixed(1);
+avgStars.textContent=stars(Math.round(average));
+count.textContent=`${snap.size} review${snap.size===1?"":"s"}`;
+
+}catch(error){
+console.error(error);
+count.textContent="Unable to load reviews";
+}
+}
+
+form?.addEventListener("submit",async e=>{
+e.preventDefault();
+
+const name=document.getElementById("name").value.trim();
+const rating=Number(document.getElementById("rating").value);
+const text=document.getElementById("text").value.trim();
+
+if(!name||!rating||!text)return;
+
+submit.disabled=true;
+submit.textContent="Submitting...";
+msg.textContent="";
 
 try{
 await addDoc(collection(db,"reviews"),{
-name:name.value.trim(),
-text:text.value.trim(),
-rating:Number(rating.value),
+name:name,
+rating:rating,
+text:text,
 createdAt:serverTimestamp()
 });
 
-e.target.reset();
+form.reset();
 msg.textContent="Thank you! Your review has been submitted.";
-loadReviews();
+msg.style.color="#087f5b";
+await loadReviews();
 
-}catch(err){
-console.error(err);
-msg.textContent="Could not submit your review.";
+}catch(error){
+console.error(error);
+msg.textContent="Sorry, your review could not be submitted.";
+msg.style.color="#c00";
+
+}finally{
+submit.disabled=false;
+submit.textContent="Submit Review";
 }
-
-btn.disabled=false;
 });
 
 loadReviews();
