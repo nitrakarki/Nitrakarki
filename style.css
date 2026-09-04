@@ -1,6 +1,6 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;overflow-x:hidden}
-body{font-family:Arial,sans-serif;line-height:1.6;color:#222;overflow-x:hidden}
+body{font-family:Arial,sans-serif;line-height:1.6;color:#222;overflow-x:hidden;background:#fff}
 img{max-width:100%;display:block}
 a{text-decoration:none;color:inherit}
 button{cursor:pointer;font-family:inherit}
@@ -13,16 +13,15 @@ nav a{font-weight:bold;color:#333}
 nav a:hover{color:#087f5b}
 .menu{display:none;background:none;border:0;font-size:28px;color:#087f5b}
 
-.hero{min-height:90vh;padding:60px 20px;display:flex;align-items:center;background:linear-gradient(135deg,#eafaf5,#fff,#eef8ff)}
-.hero-content{max-width:1100px;width:100%;margin:auto;display:flex;align-items:center;justify-content:center;gap:60px}
-.hero-profile{width:300px;height:380px;min-width:300px;border-radius:15px;overflow:hidden;border:5px solid #fff;box-shadow:0 8px 30px #0003;background:#eee}
-.hero-profile img{width:100%;height:100%;object-fit:cover;object-position:center}
-.hero-text{max-width:650px}
-.hero-greeting{color:#087f5b!important;font-weight:bold}
-.hero-text h1{font-size:46px;line-height:1.15;margin-bottom:18px}
-.hero-text h1 span{color:#087f5b}
-.hero-text p{font-size:18px;color:#555;margin-bottom:14px}
-.hero-buttons{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}
+.hero{min-height:90vh;padding:70px 20px;display:flex;align-items:center;position:relative;overflow:hidden;background:url("hero.jpg") center/cover no-repeat}
+.hero:before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.58);z-index:0}
+.hero-content{position:relative;z-index:1;max-width:1100px;width:100%;margin:auto;display:flex;justify-content:center;align-items:center}
+.hero-text{max-width:750px;text-align:center}
+.hero-greeting{color:#ffc02e!important;font-weight:bold}
+.hero-text h1{font-size:46px;line-height:1.15;margin-bottom:18px;color:#fff}
+.hero-text h1 span{color:#ffc02e}
+.hero-text p{font-size:18px;color:#fff;margin-bottom:14px}
+.hero-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:20px}
 
 .btn{display:inline-flex;justify-content:center;align-items:center;padding:12px 22px;border-radius:8px;font-weight:bold;border:2px solid #087f5b;min-height:48px;background:#087f5b;color:#fff;transition:.2s}
 .btn:hover{background:#065f48;transform:translateY(-2px)}
@@ -58,7 +57,8 @@ section{padding:70px 20px}
 .gallery-slide{flex:0 0 33.333%;padding:7px}
 .gallery-slide img{width:100%;height:270px;object-fit:cover;border-radius:10px}
 .gallery-btn{position:absolute;top:50%;transform:translateY(-50%);border:0;border-radius:50%;width:42px;height:42px;background:#0009;color:#fff;font-size:28px}
-.gallery-btn.prev{left:12px}.gallery-btn.next{right:12px}
+.gallery-btn.prev{left:12px}
+.gallery-btn.next{right:12px}
 .dots{text-align:center;margin-top:15px}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#bbb;margin:4px;cursor:pointer}
 .dot.active{background:#087f5b}
@@ -70,11 +70,14 @@ section{padding:70px 20px}
 .review-list{max-width:1100px;margin:0 auto 30px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .review-card{background:#fff;padding:22px;border-radius:12px;box-shadow:0 4px 18px #0001}
 .review-card h3{color:#087f5b;margin-bottom:5px}
+.review-card small{color:#777}
+.review-card p{margin-top:10px;color:#555}
 .review-form{max-width:650px;margin:auto;background:#fff;padding:25px;border-radius:12px;box-shadow:0 4px 18px #0001}
 .review-form label{display:block;font-weight:bold;margin:12px 0 6px}
 .review-form input,.review-form textarea,.review-form select{width:100%;padding:11px;border:1px solid #ccc;border-radius:7px;font-size:16px}
 .review-form textarea{min-height:120px;resize:vertical}
 .review-form button{margin-top:15px;padding:12px 22px;border:0;border-radius:8px;background:#087f5b;color:#fff;font-weight:bold;font-size:16px}
+.review-form button:disabled{opacity:.6;cursor:not-allowed}
 #msg{text-align:center;margin-top:10px;font-weight:bold}
 
 .faq{max-width:800px;margin:auto}
@@ -116,10 +119,8 @@ nav{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;flex-
 nav.show{display:flex}
 nav a{padding:13px 20px;border-bottom:1px solid #eee}
 
-.hero{padding:50px 15px;min-height:auto}
-.hero-content{flex-direction:column;text-align:center;gap:28px}
-.hero-profile{width:240px;height:300px;min-width:240px}
-.hero-text{width:100%}
+.hero{min-height:calc(100vh - 70px);padding:55px 15px;background-position:center}
+.hero:before{background:rgba(0,0,0,.63)}
 .hero-text h1{font-size:32px}
 .hero-text p{font-size:16px}
 .hero-buttons{flex-direction:column;align-items:center}
@@ -142,8 +143,8 @@ section{padding:55px 15px}
 @media(max-width:400px){
 .logo{font-size:15px}
 .logo small{font-size:9px}
-.hero-profile{width:210px;height:270px;min-width:210px}
 .hero-text h1{font-size:28px}
+.hero-text p{font-size:15px}
 .title h2{font-size:26px}
 .box{padding:20px}
 }
