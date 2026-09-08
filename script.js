@@ -28,6 +28,8 @@ document.querySelectorAll("nav a").forEach(a => a.addEventListener("click", () =
   if (menu) menu.setAttribute("aria-expanded", "false");
 }));
 
+/* ================= GALLERY ================= */
+
 let galleryIndex = 0;
 
 function visibleSlides() {
@@ -37,22 +39,34 @@ function visibleSlides() {
 function updateGallery() {
   const track = document.getElementById("galleryTrack");
   if (!track) return;
+
   const total = track.children.length;
   const visible = visibleSlides();
   const max = Math.max(0, total - visible);
+
   galleryIndex = Math.min(galleryIndex, max);
-  track.style.transform = `translateX(-${galleryIndex * (100 / visible)}%)`;
+
+  track.style.transform =
+    `translateX(-${galleryIndex * (100 / visible)}%)`;
+
   createDots(total - visible + 1);
 }
 
 function createDots(total) {
   const dots = document.getElementById("dots");
   if (!dots) return;
+
   dots.innerHTML = "";
+
   for (let i = 0; i < total; i++) {
     const d = document.createElement("span");
     d.className = "dot" + (i === galleryIndex ? " active" : "");
-    d.onclick = () => { galleryIndex = i; updateGallery(); };
+
+    d.onclick = () => {
+      galleryIndex = i;
+      updateGallery();
+    };
+
     dots.appendChild(d);
   }
 }
@@ -60,14 +74,20 @@ function createDots(total) {
 window.moveGallery = function(direction) {
   const total = document.querySelectorAll(".gallery-slide").length;
   const max = Math.max(0, total - visibleSlides());
+
   galleryIndex += direction;
+
   if (galleryIndex < 0) galleryIndex = max;
   if (galleryIndex > max) galleryIndex = 0;
+
   updateGallery();
 };
 
 window.addEventListener("resize", updateGallery);
 updateGallery();
+
+
+/* ================= ITINERARIES ================= */
 
 const itineraries = {
   ebc: {
@@ -89,6 +109,7 @@ const itineraries = {
       "Day 14: Final Departure from Nepal."
     ]
   },
+
   abc: {
     title: "Annapurna Base Camp Trek — 5 Days",
     days: [
@@ -99,6 +120,7 @@ const itineraries = {
       "Day 05: Trek to Jhinu Danda (Hot Springs) and drive back to Pokhara."
     ]
   },
+
   langtang: {
     title: "Langtang Valley Trek — 10 Days",
     days: [
@@ -114,6 +136,7 @@ const itineraries = {
       "Day 10: Drive back from Dhunche to Kathmandu."
     ]
   },
+
   mardi: {
     title: "Mardi Himal Trek — 6 Days",
     days: [
@@ -125,6 +148,7 @@ const itineraries = {
       "Day 06: Drive from Siding Village back to Pokhara."
     ]
   },
+
   manaslu: {
     title: "Manaslu Circuit Trek — 14 Days",
     days: [
@@ -149,8 +173,13 @@ const itineraries = {
 window.openItinerary = function(type) {
   const data = itineraries[type];
   if (!data) return;
+
   document.getElementById("modalContent").innerHTML =
-    `<h2>${data.title}</h2>${data.days.map(d => `<div class="day"><b>${d.split(":")[0]}:</b>${d.substring(d.indexOf(":") + 1)}</div>`).join("")}`;
+    `<h2>${data.title}</h2>` +
+    data.days.map(d =>
+      `<div class="day"><b>${d.split(":")[0]}:</b>${d.substring(d.indexOf(":") + 1)}</div>`
+    ).join("");
+
   document.getElementById("modal").style.display = "block";
   document.body.style.overflow = "hidden";
 };
@@ -168,6 +197,9 @@ document.addEventListener("keydown", e => {
   if (e.key === "Escape") closeItinerary();
 });
 
+
+/* ================= REVIEWS ================= */
+
 const form = document.getElementById("reviewForm");
 const list = document.getElementById("reviewList");
 const avg = document.getElementById("avg");
@@ -175,8 +207,13 @@ const avgStars = document.getElementById("avgStars");
 const count = document.getElementById("count");
 const msg = document.getElementById("msg");
 const submit = document.getElementById("submit");
+const viewAllBtn = document.getElementById("viewAllReviews");
+
+let allReviews = [];
+let showingAllReviews = false;
 
 function stars(n) {
+  n = Math.max(0, Math.min(5, Number(n) || 0));
   return "★".repeat(n) + "☆".repeat(5 - n);
 }
 
@@ -190,38 +227,98 @@ function escapeHTML(str) {
   }[m]));
 }
 
+function renderReviews() {
+  list.innerHTML = "";
+
+  const reviewsToShow = showingAllReviews
+    ? allReviews
+    : allReviews.slice(0, 3);
+
+  reviewsToShow.forEach(r => {
+    const rating = Number(r.rating) || 0;
+
+    const card = document.createElement("div");
+    card.className = "review-card";
+
+    card.innerHTML = `
+      <h3>${escapeHTML(r.name || "Traveler")}</h3>
+      <div class="review-stars">${stars(rating)}</div>
+      <p>${escapeHTML(r.text || "")}</p>
+    `;
+
+    list.appendChild(card);
+  });
+
+  if (allReviews.length > 3) {
+    viewAllBtn.style.display = "inline-block";
+
+    viewAllBtn.textContent = showingAllReviews
+      ? "Show Less"
+      : `View All Reviews (${allReviews.length})`;
+  } else {
+    viewAllBtn.style.display = "none";
+  }
+}
+
+viewAllBtn?.addEventListener("click", () => {
+  showingAllReviews = !showingAllReviews;
+  renderReviews();
+
+  if (!showingAllReviews) {
+    document.getElementById("reviews")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+});
+
 async function loadReviews() {
   try {
-    const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
+    const q = query(
+      collection(db, "reviews"),
+      orderBy("createdAt", "desc")
+    );
+
     const snap = await getDocs(q);
-    let total = 0;
-    list.innerHTML = "";
+
+    allReviews = [];
 
     if (snap.empty) {
+      list.innerHTML = "";
       count.textContent = "No reviews yet";
       avg.textContent = "0.0";
       avgStars.textContent = "☆☆☆☆☆";
+      viewAllBtn.style.display = "none";
       return;
     }
+
+    let total = 0;
 
     snap.forEach(doc => {
       const r = doc.data();
       const rating = Number(r.rating) || 0;
+
       total += rating;
 
-      const card = document.createElement("div");
-      card.className = "review-card";
-      card.innerHTML =
-        `<h3>${escapeHTML(r.name || "Traveler")}</h3>
-        <div class="review-stars">${stars(rating)}</div>
-        <p>${escapeHTML(r.text || "")}</p>`;
-      list.appendChild(card);
+      allReviews.push({
+        name: r.name || "Traveler",
+        rating: rating,
+        text: r.text || ""
+      });
     });
 
-    const average = total / snap.size;
+    const average = total / allReviews.length;
+
     avg.textContent = average.toFixed(1);
     avgStars.textContent = stars(Math.round(average));
-    count.textContent = `${snap.size} review${snap.size === 1 ? "" : "s"}`;
+
+    count.textContent =
+      `${allReviews.length} review${allReviews.length === 1 ? "" : "s"}`;
+
+    /* Always show only 3 after loading */
+    showingAllReviews = false;
+
+    renderReviews();
 
   } catch (error) {
     console.error(error);
@@ -229,41 +326,12 @@ async function loadReviews() {
   }
 }
 
+
+/* ================= SUBMIT REVIEW ================= */
+
 form?.addEventListener("submit", async e => {
   e.preventDefault();
 
   const name = document.getElementById("name").value.trim();
   const rating = Number(document.getElementById("rating").value);
-  const text = document.getElementById("text").value.trim();
-
-  if (!name || !rating || !text) return;
-
-  submit.disabled = true;
-  submit.textContent = "Submitting...";
-  msg.textContent = "";
-
-  try {
-    await addDoc(collection(db, "reviews"), {
-      name: name,
-      rating: rating,
-      text: text,
-      createdAt: serverTimestamp()
-    });
-
-    form.reset();
-    msg.textContent = "Thank you! Your review has been submitted.";
-    msg.style.color = "#087f5b";
-    await loadReviews();
-
-  } catch (error) {
-    console.error(error);
-    msg.textContent = "Sorry, your review could not be submitted.";
-    msg.style.color = "#c00";
-
-  } finally {
-    submit.disabled = false;
-    submit.textContent = "Submit Review";
-  }
-});
-
-loadReviews();
+  const text = document.getElementById("text").value.trim
