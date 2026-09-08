@@ -35,6 +35,10 @@ section{padding:70px 20px}
 .box h2{color:#087f5b;margin-bottom:15px}
 .box p{margin-bottom:14px;color:#555}
 
+/* About Badges */
+.badge-container{display:flex;flex-wrap:wrap;gap:10px;margin:15px 0}
+.badge{background:#eafaf5;color:#087f5b;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:bold;border:1px solid #087f5b33}
+
 .profile{display:grid;grid-template-columns:380px 1fr;gap:40px;align-items:center}
 .profile img{width:100%;height:380px;object-fit:cover;border-radius:15px}
 .profile p{margin-bottom:12px;color:#555}
@@ -46,9 +50,9 @@ section{padding:70px 20px}
 .why-card p{font-size:14px;color:#666}
 
 .cards{max-width:1100px;margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 18px #0002}
+.card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 18px #0002;display:flex;flex-direction:column;justify-content:space-between}
 .card img{width:100%;height:220px;object-fit:cover}
-.card>div{padding:22px}
+.card>div{padding:22px;display:flex;flex-direction:column;flex-grow:1;justify-content:space-between}
 .card h3{color:#087f5b;margin-bottom:8px;font-size:22px}
 .card p{color:#555;margin-bottom:12px}
 
@@ -108,6 +112,7 @@ footer{background:#123;color:#fff;text-align:center;padding:25px 15px;line-heigh
 
 @media(max-width:900px){
 .why{grid-template-columns:repeat(2,1fr)}
+.cards{grid-template-columns:repeat(2,1fr)}
 .profile{grid-template-columns:1fr}
 .profile img{max-width:380px;margin:auto}
 }
@@ -147,9 +152,10 @@ section{padding:55px 15px}
 .hero-text p{font-size:15px}
 .title h2{font-size:26px}
 .box{padding:20px}
-}/* ===== ABOUT SECTION - DESKTOP IMAGE FIX ===== */
-@media (min-width: 769px) {
+}
 
+/* ===== ABOUT SECTION - DESKTOP FIX ===== */
+@media (min-width: 769px) {
   #about .profile {
     display: grid;
     grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
