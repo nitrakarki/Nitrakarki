@@ -9,14 +9,17 @@ storageBucket:"nitra-hiking-trek.firebasestorage.app",
 messagingSenderId:"229092748752",
 appId:"1:229092748752:web:ab822b061527ce37ce1dd5"
 };
+
 const db=getFirestore(initializeApp(firebaseConfig));
 
 /* MENU */
 const menu=document.getElementById("menuBtn"),nav=document.getElementById("nav");
+
 menu?.addEventListener("click",()=>{
 nav.classList.toggle("show");
 menu.setAttribute("aria-expanded",nav.classList.contains("show"));
 });
+
 document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>{
 nav.classList.remove("show");
 menu?.setAttribute("aria-expanded","false");
@@ -24,6 +27,7 @@ menu?.setAttribute("aria-expanded","false");
 
 /* GALLERY */
 let galleryIndex=0;
+
 const visibleSlides=()=>innerWidth<=750?1:3;
 
 function createDots(total){
@@ -41,17 +45,27 @@ dots.appendChild(d);
 function updateGallery(){
 const track=document.getElementById("galleryTrack");
 if(!track)return;
-const total=track.children.length,v=visibleSlides(),max=Math.max(0,total-v);
+
+const total=track.children.length;
+const v=visibleSlides();
+const max=Math.max(0,total-v);
+
 galleryIndex=Math.min(galleryIndex,max);
 track.style.transform=`translateX(-${galleryIndex*(100/v)}%)`;
 createDots(max+1);
 }
 
 window.moveGallery=d=>{
-const max=Math.max(0,document.querySelectorAll(".gallery-slide").length-visibleSlides());
+const max=Math.max(
+0,
+document.querySelectorAll(".gallery-slide").length-visibleSlides()
+);
+
 galleryIndex+=d;
+
 if(galleryIndex<0)galleryIndex=max;
 if(galleryIndex>max)galleryIndex=0;
+
 updateGallery();
 };
 
@@ -60,7 +74,10 @@ updateGallery();
 
 /* ITINERARIES */
 const itineraries={
-ebc:{title:"Everest Base Camp Trek — 14 Days",days:[
+
+ebc:{
+title:"Everest Base Camp Trek — 14 Days",
+days:[
 "Day 01: Arrival in Kathmandu and trek preparation.",
 "Day 02: Fly to Lukla (2,860m) and trek to Phakding.",
 "Day 03: Trek from Phakding to Namche Bazaar (3,440m).",
@@ -77,7 +94,9 @@ ebc:{title:"Everest Base Camp Trek — 14 Days",days:[
 "Day 14: Final Departure from Nepal."
 ]},
 
-abc:{title:"Annapurna Base Camp Trek — 5 Days",days:[
+abc:{
+title:"Annapurna Base Camp Trek — 5 Days",
+days:[
 "Day 01: Drive Pokhara to Samrong and trek to Sinuwa (2,340m).",
 "Day 02: Trek from Sinuwa to Himalaya (2,900m).",
 "Day 03: Trek from Himalaya to Annapurna Base Camp (4,130m) via Deurali.",
@@ -85,7 +104,9 @@ abc:{title:"Annapurna Base Camp Trek — 5 Days",days:[
 "Day 05: Trek to Jhinu Danda (Hot Springs) and drive back to Pokhara."
 ]},
 
-langtang:{title:"Langtang Valley Trek — 10 Days",days:[
+langtang:{
+title:"Langtang Valley Trek — 10 Days",
+days:[
 "Day 01: Scenic drive from Kathmandu to Syabrubesi.",
 "Day 02: Trek from Syabrubesi to Lama Hotel.",
 "Day 03: Trek from Lama Hotel to Langtang Village.",
@@ -98,7 +119,9 @@ langtang:{title:"Langtang Valley Trek — 10 Days",days:[
 "Day 10: Drive back from Dhunche to Kathmandu."
 ]},
 
-mardi:{title:"Mardi Himal Trek — 6 Days",days:[
+mardi:{
+title:"Mardi Himal Trek — 6 Days",
+days:[
 "Day 01: Drive from Pokhara to Kande and trek to Australian Camp / Forest Camp.",
 "Day 02: Trek from Forest Camp to Low Camp.",
 "Day 03: Trek from Low Camp to High Camp (3,580m).",
@@ -107,7 +130,9 @@ mardi:{title:"Mardi Himal Trek — 6 Days",days:[
 "Day 06: Drive from Siding Village back to Pokhara."
 ]},
 
-manaslu:{title:"Manaslu Circuit Trek — 14 Days",days:[
+manaslu:{
+title:"Manaslu Circuit Trek — 14 Days",
+days:[
 "Day 01: Drive from Kathmandu to Soti Khola / Machha Khola.",
 "Day 02: Trek to Jagat (1,340m).",
 "Day 03: Trek from Jagat to Deng.",
@@ -124,8 +149,9 @@ manaslu:{title:"Manaslu Circuit Trek — 14 Days",days:[
 "Day 14: Drive from Besisahar back to Kathmandu."
 ]},
 
-/* NEW GOKYO + CHO LA TREK */
-gokyo:{title:"EBC Trek via Gokyo Cho La Pass — 17 Days",days:[
+gokyo:{
+title:"EBC Trek via Gokyo Cho La Pass — 17 Days",
+days:[
 "Day 01: Arrival in Kathmandu (1,400m).",
 "Day 02: Fly from Kathmandu to Lukla (2,840m) and trek to Phakding (2,610m).",
 "Day 03: Trek from Phakding to Namche Bazaar (3,440m).",
@@ -143,14 +169,21 @@ gokyo:{title:"EBC Trek via Gokyo Cho La Pass — 17 Days",days:[
 "Day 15: Trek from Namche Bazaar to Lukla (2,840m).",
 "Day 16: Fly from Lukla to Kathmandu.",
 "Day 17: Final departure from Nepal."
-]}};
+]}
+
+};
 
 window.openItinerary=type=>{
 const x=itineraries[type];
 if(!x)return;
+
 document.getElementById("modalContent").innerHTML=
 `<h2>${x.title}</h2>`+
-x.days.map(d=>`<div class="day"><b>${d.split(":")[0]}:</b>${d.substring(d.indexOf(":")+1)}</div>`).join("");
+x.days.map(d=>`
+<div class="day">
+<b>${d.split(":")[0]}:</b>${d.substring(d.indexOf(":")+1)}
+</div>`).join("");
+
 document.getElementById("modal").style.display="block";
 document.body.style.overflow="hidden";
 };
@@ -186,33 +219,60 @@ return"★".repeat(n)+"☆".repeat(5-n);
 };
 
 const escapeHTML=s=>String(s).replace(/[&<>"']/g,m=>({
-"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
 }[m]));
 
 function renderReviews(){
 list.innerHTML="";
-(reviews.length>3&&showAll?reviews:reviews.slice(0,3)).forEach(r=>{
+
+const visible=showAll?reviews:reviews.slice(0,3);
+
+visible.forEach(r=>{
 const card=document.createElement("div");
 card.className="review-card";
-card.innerHTML=`<h3>${escapeHTML(r.name)}</h3><div class="review-stars">${stars(r.rating)}</div><p>${escapeHTML(r.text)}</p>`;
+
+card.innerHTML=`
+<h3>${escapeHTML(r.name)}</h3>
+<div class="review-stars">${stars(r.rating)}</div>
+<p>${escapeHTML(r.text)}</p>`;
+
 list.appendChild(card);
 });
 
 if(reviews.length>3){
 viewAll.style.display="flex";
-viewAll.textContent=showAll?"Show Less":`View All Reviews (${reviews.length})`;
-}else viewAll.style.display="none";
+viewAll.textContent=
+showAll?"Show Less":`View All Reviews (${reviews.length})`;
+}else{
+viewAll.style.display="none";
+}
 }
 
 viewAll?.addEventListener("click",()=>{
 showAll=!showAll;
 renderReviews();
-if(!showAll)document.getElementById("reviews")?.scrollIntoView({behavior:"smooth",block:"start"});
+
+if(!showAll){
+document.getElementById("reviews")?.scrollIntoView({
+behavior:"smooth",
+block:"start"
+});
+}
 });
 
 async function loadReviews(){
 try{
-const snap=await getDocs(query(collection(db,"reviews"),orderBy("createdAt","desc")));
+
+const q=query(
+collection(db,"reviews"),
+orderBy("createdAt","desc")
+);
+
+const snap=await getDocs(q);
 reviews=[];
 
 if(snap.empty){
@@ -226,15 +286,25 @@ return;
 let total=0;
 
 snap.forEach(doc=>{
-const r=doc.data(),rating=Number(r.rating)||0;
+const r=doc.data();
+const rating=Number(r.rating)||0;
+
 total+=rating;
-reviews.push({name:r.name||"Traveler",rating,text:r.text||""});
+
+reviews.push({
+name:r.name||"Traveler",
+rating,
+text:r.text||""
+});
 });
 
 const average=total/reviews.length;
+
 avg.textContent=average.toFixed(1);
 avgStars.textContent=stars(Math.round(average));
-count.textContent=`${reviews.length} review${reviews.length===1?"":"s"}`;
+count.textContent=
+`${reviews.length} review${reviews.length===1?"":"s"}`;
+
 showAll=false;
 renderReviews();
 
@@ -248,9 +318,9 @@ count.textContent="Unable to load reviews";
 form?.addEventListener("submit",async e=>{
 e.preventDefault();
 
-const name=document.getElementById("name").value.trim(),
-rating=Number(document.getElementById("rating").value),
-text=document.getElementById("text").value.trim();
+const name=document.getElementById("name").value.trim();
+const rating=Number(document.getElementById("rating").value);
+const text=document.getElementById("text").value.trim();
 
 if(!name||!rating||!text)return;
 
@@ -259,22 +329,33 @@ submit.textContent="Submitting...";
 msg.textContent="";
 
 try{
+
 await addDoc(collection(db,"reviews"),{
-name,rating,text,createdAt:serverTimestamp()
+name,
+rating,
+text,
+createdAt:serverTimestamp()
 });
 
 form.reset();
+
 msg.textContent="Thank you! Your review has been submitted.";
 msg.style.color="#087f5b";
+
 await loadReviews();
 
 }catch(e){
+
 console.error(e);
+
 msg.textContent="Sorry, your review could not be submitted.";
 msg.style.color="#c00";
+
 }finally{
+
 submit.disabled=false;
 submit.textContent="Submit Review";
+
 }
 });
 
