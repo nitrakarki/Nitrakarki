@@ -9,7 +9,6 @@ storageBucket:"nitra-hiking-trek.firebasestorage.app",
 messagingSenderId:"229092748752",
 appId:"1:229092748752:web:ab822b061527ce37ce1dd5"
 };
-
 const db=getFirestore(initializeApp(firebaseConfig));
 
 /* MENU */
@@ -77,6 +76,7 @@ ebc:{title:"Everest Base Camp Trek — 14 Days",days:[
 "Day 13: Fly from Lukla to Kathmandu.",
 "Day 14: Final Departure from Nepal."
 ]},
+
 abc:{title:"Annapurna Base Camp Trek — 5 Days",days:[
 "Day 01: Drive Pokhara to Samrong and trek to Sinuwa (2,340m).",
 "Day 02: Trek from Sinuwa to Himalaya (2,900m).",
@@ -84,6 +84,7 @@ abc:{title:"Annapurna Base Camp Trek — 5 Days",days:[
 "Day 04: Trek from Annapurna Base Camp down to Bamboo.",
 "Day 05: Trek to Jhinu Danda (Hot Springs) and drive back to Pokhara."
 ]},
+
 langtang:{title:"Langtang Valley Trek — 10 Days",days:[
 "Day 01: Scenic drive from Kathmandu to Syabrubesi.",
 "Day 02: Trek from Syabrubesi to Lama Hotel.",
@@ -96,6 +97,7 @@ langtang:{title:"Langtang Valley Trek — 10 Days",days:[
 "Day 09: Trek from Sing Gompa to Dhunche.",
 "Day 10: Drive back from Dhunche to Kathmandu."
 ]},
+
 mardi:{title:"Mardi Himal Trek — 6 Days",days:[
 "Day 01: Drive from Pokhara to Kande and trek to Australian Camp / Forest Camp.",
 "Day 02: Trek from Forest Camp to Low Camp.",
@@ -104,6 +106,7 @@ mardi:{title:"Mardi Himal Trek — 6 Days",days:[
 "Day 05: Trek from Low Camp to Siding Village.",
 "Day 06: Drive from Siding Village back to Pokhara."
 ]},
+
 manaslu:{title:"Manaslu Circuit Trek — 14 Days",days:[
 "Day 01: Drive from Kathmandu to Soti Khola / Machha Khola.",
 "Day 02: Trek to Jagat (1,340m).",
@@ -119,22 +122,48 @@ manaslu:{title:"Manaslu Circuit Trek — 14 Days",days:[
 "Day 12: Trek from Bimthang to Tilije.",
 "Day 13: Trek to Dharapani and drive to Besisahar.",
 "Day 14: Drive from Besisahar back to Kathmandu."
-]}}
+]},
+
+/* NEW GOKYO + CHO LA TREK */
+gokyo:{title:"EBC Trek via Gokyo Cho La Pass — 17 Days",days:[
+"Day 01: Arrival in Kathmandu (1,400m).",
+"Day 02: Fly from Kathmandu to Lukla (2,840m) and trek to Phakding (2,610m).",
+"Day 03: Trek from Phakding to Namche Bazaar (3,440m).",
+"Day 04: Acclimatization day in Namche Bazaar.",
+"Day 05: Trek from Namche Bazaar to Dole (4,110m).",
+"Day 06: Trek from Dole to Machhermo (4,470m).",
+"Day 07: Trek from Machhermo to Gokyo (4,790m).",
+"Day 08: Acclimatization day at Gokyo and optional Gokyo Ri hike.",
+"Day 09: Trek from Gokyo to Dragnag (4,750m).",
+"Day 10: Cross Cho La Pass (5,420m) and trek to Dzongla (4,830m).",
+"Day 11: Trek from Dzongla to Lobuche (4,910m).",
+"Day 12: Trek from Lobuche to Everest Base Camp (5,365m) via Gorak Shep.",
+"Day 13: Early morning hike to Kala Patthar (5,545m), then trek to Pheriche (4,240m).",
+"Day 14: Trek from Pheriche to Namche Bazaar (3,440m).",
+"Day 15: Trek from Namche Bazaar to Lukla (2,840m).",
+"Day 16: Fly from Lukla to Kathmandu.",
+"Day 17: Final departure from Nepal."
+]}};
+
 window.openItinerary=type=>{
 const x=itineraries[type];
 if(!x)return;
 document.getElementById("modalContent").innerHTML=
-`<h2>${x.title}</h2>`+x.days.map(d=>`<div class="day"><b>${d.split(":")[0]}:</b>${d.substring(d.indexOf(":")+1)}</div>`).join("");
+`<h2>${x.title}</h2>`+
+x.days.map(d=>`<div class="day"><b>${d.split(":")[0]}:</b>${d.substring(d.indexOf(":")+1)}</div>`).join("");
 document.getElementById("modal").style.display="block";
 document.body.style.overflow="hidden";
 };
+
 window.closeItinerary=()=>{
 document.getElementById("modal").style.display="none";
 document.body.style.overflow="";
 };
+
 document.getElementById("modal")?.addEventListener("click",e=>{
 if(e.target.id==="modal")closeItinerary();
 });
+
 document.addEventListener("keydown",e=>{
 if(e.key==="Escape")closeItinerary();
 });
@@ -162,15 +191,10 @@ const escapeHTML=s=>String(s).replace(/[&<>"']/g,m=>({
 
 function renderReviews(){
 list.innerHTML="";
-const visible=showAll?reviews:reviews.slice(0,3);
-
-visible.forEach(r=>{
+(reviews.length>3&&showAll?reviews:reviews.slice(0,3)).forEach(r=>{
 const card=document.createElement("div");
 card.className="review-card";
-card.innerHTML=`
-<h3>${escapeHTML(r.name)}</h3>
-<div class="review-stars">${stars(r.rating)}</div>
-<p>${escapeHTML(r.text)}</p>`;
+card.innerHTML=`<h3>${escapeHTML(r.name)}</h3><div class="review-stars">${stars(r.rating)}</div><p>${escapeHTML(r.text)}</p>`;
 list.appendChild(card);
 });
 
@@ -188,8 +212,7 @@ if(!showAll)document.getElementById("reviews")?.scrollIntoView({behavior:"smooth
 
 async function loadReviews(){
 try{
-const q=query(collection(db,"reviews"),orderBy("createdAt","desc"));
-const snap=await getDocs(q);
+const snap=await getDocs(query(collection(db,"reviews"),orderBy("createdAt","desc")));
 reviews=[];
 
 if(snap.empty){
@@ -205,11 +228,7 @@ let total=0;
 snap.forEach(doc=>{
 const r=doc.data(),rating=Number(r.rating)||0;
 total+=rating;
-reviews.push({
-name:r.name||"Traveler",
-rating,
-text:r.text||""
-});
+reviews.push({name:r.name||"Traveler",rating,text:r.text||""});
 });
 
 const average=total/reviews.length;
@@ -225,7 +244,7 @@ count.textContent="Unable to load reviews";
 }
 }
 
-/* SUBMIT */
+/* SUBMIT REVIEW */
 form?.addEventListener("submit",async e=>{
 e.preventDefault();
 
