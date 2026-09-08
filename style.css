@@ -188,3 +188,24 @@ section{padding:55px 15px}
     overflow-wrap: break-word;
   }
 }
+/* ===== VIEW ALL REVIEWS ===== */
+.view-all-btn{
+  display:flex;
+  margin:0 auto 10px;
+  min-width:210px;
+  border:2px solid #087f5b;
+  background:#087f5b;
+  color:#fff;
+  padding:12px 22px;
+  border-radius:8px;
+  font-weight:bold;
+  font-size:16px;
+  justify-content:center;
+  align-items:center;
+  transition:.2s;
+}
+
+.view-all-btn:hover{
+  background:#065f48;
+  transform:translateY(-2px);
+}
